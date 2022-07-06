@@ -5,7 +5,7 @@ using UnityEngine.XR.ARFoundation;
 
 [RequireComponent(typeof(ARRaycastManager))]
 public class ARPlacementManager : Singleton<ARPlacementManager>
-{ 
+{
     [SerializeField]
     private Camera arCamera;
 
@@ -20,10 +20,16 @@ public class ARPlacementManager : Singleton<ARPlacementManager>
 
     private ARAnchorManager arAnchorManager = null;
 
-    void Awake() 
+    void Awake()
     {
         arRaycastManager = GetComponent<ARRaycastManager>();
         arAnchorManager = GetComponent<ARAnchorManager>();
+        if(arAnchorManager ==null){
+          Debug.Log("Ar Anchor not logged correctly");
+        }
+        else{
+          Debug.Log("Ar Anchor is not the issue");
+        }
     }
 
     bool TryGetTouchPosition(out Vector2 touchPosition)
@@ -65,7 +71,7 @@ public class ARPlacementManager : Singleton<ARPlacementManager>
         {
             var hitPose = hits[0].pose;
             placedGameObject = Instantiate(placedPrefab, hitPose.position, hitPose.rotation);
-            var anchor = arAnchorManager.AddAnchor(new Pose(hitPose.position, hitPose.rotation));
+            var anchor = placedGameObject.AddComponent<ARAnchor>();
             placedGameObject.transform.parent = anchor.transform;
 
             // this won't host the anchor just add a reference to be later host it

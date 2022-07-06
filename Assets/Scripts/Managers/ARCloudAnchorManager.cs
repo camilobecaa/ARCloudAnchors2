@@ -25,14 +25,22 @@ public class ARCloudAnchorManager : Singleton<ARCloudAnchorManager>
     private bool anchorUpdateInProgress = false;
 
     private bool anchorResolveInProgress = false;
-    
+
     private float safeToResolvePassed = 0;
 
     private UnityEventResolver resolver = null;
 
-    private void Awake() 
+    private void Awake()
     {
-        resolver = new UnityEventResolver();   
+      // Check Internet Access
+        if(Application.internetReachability == NetworkReachability.NotReachable)
+        {
+          Debug.Log("Error. Check internet connection!");
+        }
+        else{
+          Debug.Log("Internet is fine");
+        }
+        resolver = new UnityEventResolver();
         resolver.AddListener((t) => ARPlacementManager.Instance.ReCreatePlacement(t));
     }
 
@@ -56,8 +64,8 @@ public class ARCloudAnchorManager : Singleton<ARCloudAnchorManager>
         FeatureMapQuality quality =
             arAnchorManager.EstimateFeatureMapQualityForHosting(GetCameraPose());
 
-        cloudAnchor = arAnchorManager.HostCloudAnchor(pendingHostAnchor, 1);
-    
+        cloudAnchor = arAnchorManager.HostCloudAnchor(pendingHostAnchor);
+
         if(cloudAnchor == null)
         {
             ARDebugManager.Instance.LogError("Unable to host cloud anchor");
@@ -67,7 +75,7 @@ public class ARCloudAnchorManager : Singleton<ARCloudAnchorManager>
             anchorUpdateInProgress = true;
         }
     }
-    
+
     public void Resolve()
     {
         ARDebugManager.Instance.LogInfo("Resolve executing");
@@ -90,7 +98,7 @@ public class ARCloudAnchorManager : Singleton<ARCloudAnchorManager>
         if(cloudAnchorState == CloudAnchorState.Success)
         {
             ARDebugManager.Instance.LogError("Anchor successfully hosted");
-            
+
             anchorUpdateInProgress = false;
 
             // keep track of cloud anchors added
@@ -106,7 +114,7 @@ public class ARCloudAnchorManager : Singleton<ARCloudAnchorManager>
     private void CheckResolveProgress()
     {
         CloudAnchorState cloudAnchorState = cloudAnchor.cloudAnchorState;
-        
+
         ARDebugManager.Instance.LogInfo($"ResolveCloudAnchor state {cloudAnchorState}");
 
         if (cloudAnchorState == CloudAnchorState.Success)
